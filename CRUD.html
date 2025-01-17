@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Empresa</title>
+    <style>
+        body {
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #065fbd;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #050505;
+        }
+    </style>
+</head>
+<body>
+    <h1>CRUD Empresa</h1>
+    <form id="companyForm">
+        <div class="form-group">
+            <label for="id">ID</label>
+            <input type="number" id="id" name="id" required>
+        </div>
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="nit">Número de NIT</label>
+            <input type="text" id="nit" name="nit">
+        </div>
+        <div class="form-group">
+            <label for="foundationDate">Fecha de Fundación</label>
+            <input type="date" id="foundationDate" name="foundationDate">
+        </div>
+        <div class="form-group">
+            <label for="address">Dirección</label>
+            <input type="text" id="address" name="address">
+        </div>
+        <button type="submit">Guardar</button>
+        <button type="button" onclick="clearForm()">Limpiar</button>
+    </form>
+
+    <h2>Lista de Empresas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>NIT</th>
+                <th>Fundación</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="companyTableBody"></tbody>
+    </table>
+
+    <script>
+        const companyForm = document.getElementById('companyForm');
+        const companyTableBody = document.getElementById('companyTableBody');
+
+        function getCompanies() {
+            return JSON.parse(localStorage.getItem('companies')) || [];
+        }
+
+        function saveCompanies(companies) {
+            localStorage.setItem('companies', JSON.stringify(companies));
+        }
+
+        function renderCompanies() {
+            const companies = getCompanies();
+            companyTableBody.innerHTML = '';
+            companies.forEach((company, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${company.id}</td>
+                    <td>${company.name}</td>
+                    <td>${company.nit}</td>
+                    <td>${company.foundationDate}</td>
+                    <td>${company.address}</td>
+                    <td>
+                        <button onclick="editCompany(${index})">Editar</button>
+                        <button onclick="deleteCompany(${index})">Eliminar</button>
+                    </td>
+                `;
+                companyTableBody.appendChild(row);
+            });
+        }
+
+        function clearForm() {
+            companyForm.reset();
+        }
+
+        function editCompany(index) {
+            const companies = getCompanies();
+            const company = companies[index];
+            document.getElementById('id').value = company.id;
+            document.getElementById('name').value = company.name;
+            document.getElementById('nit').value = company.nit;
+            document.getElementById('foundationDate').value = company.foundationDate;
+            document.getElementById('address').value = company.address;
+        }
+
+        function deleteCompany(index) {
+            const companies = getCompanies();
+            companies.splice(index, 1);
+            saveCompanies(companies);
+            renderCompanies();
+        }
+
+        companyForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const id = document.getElementById('id').value;
+            const name = document.getElementById('name').value;
+            const nit = document.getElementById('nit').value;
+            const foundationDate = document.getElementById('foundationDate').value;
+            const address = document.getElementById('address').value;
+
+            const companies = getCompanies();
+            const index = companies.findIndex(c => c.id === id);
+
+            const newCompany = { id, name, nit, foundationDate, address };
+
+            if (index >= 0) {
+                companies[index] = newCompany;
+            } else {
+                companies.push(newCompany);
+            }
+
+            saveCompanies(companies);
+            renderCompanies();
+            clearForm();
+        });
+
+        renderCompanies();
+    </script>
+</body>
+</html>
